@@ -181,7 +181,6 @@ jobs:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
-      - destroy-enviroment
 
   configure-infrastructure:
     docker:
@@ -214,7 +213,6 @@ jobs:
           name: Configure server
           command: |
             ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
-      - destroy-enviroment
 
 workflows:
   default:
