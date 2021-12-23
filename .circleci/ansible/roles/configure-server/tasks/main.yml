@@ -1,22 +1,22 @@
 - name: Update repositories cache
+  become: yes
   apt:
     update_cache: yes
-    become: yes
 
 - name: Upgrade existing packages
+  become: yes
   apt:
     upgrade: yes
-    become: yes
 
 - name: Install npm packages
+  become: yes
   apt:
     name: npm
-    become: yes
 
 - name: Install node packages
+  become: yes
   apt:
     name: nodejs
-    become: yes
 
 - name: "install pm2"
   become: yes
@@ -25,4 +25,4 @@
     global: yes
     production: yes
     state: present
-    become: yes
+    
