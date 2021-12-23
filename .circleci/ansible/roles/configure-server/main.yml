@@ -1,0 +1,22 @@
+- name: Update repositories cache
+  apt:
+    update_cache: yes
+
+- name: Upgrade existing packages
+  apt:
+    upgrade: yes
+
+- name: Install npm packages
+  apt:
+    name: npm
+    enabled: yes
+
+- name: Install node packages
+  apt:
+    name: nodejs
+    enabled: yes
+
+- name: Install pm2 packages
+  apt:
+    name: pm2
+    enabled: yes
