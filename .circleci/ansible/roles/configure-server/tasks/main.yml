@@ -1,22 +1,28 @@
 - name: Update repositories cache
   apt:
     update_cache: yes
+    become: yes
 
 - name: Upgrade existing packages
   apt:
     upgrade: yes
+    become: yes
 
 - name: Install npm packages
   apt:
     name: npm
-    enabled: yes
+    become: yes
 
 - name: Install node packages
   apt:
     name: nodejs
-    enabled: yes
+    become: yes
 
-- name: Install pm2 packages
-  apt:
+- name: "install pm2"
+  become: yes
+  npm:
     name: pm2
-    enabled: yes
+    global: yes
+    production: yes
+    state: present
+    become: yes
