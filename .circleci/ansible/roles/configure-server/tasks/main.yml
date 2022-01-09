@@ -1,25 +1,25 @@
-- name: Update repositories cache
-  become: yes
+---
+- name: "install python"
+  become: true
   apt:
+    name: ["python"]
+    state: latest
     update_cache: yes
 
-- name: Upgrade existing packages
-  become: yes
+- name: "upgrade packages."
+  become: true
   apt:
-    upgrade: yes
+    upgrade: "yes"
 
-- name: Install npm packages
-  become: yes
+- name: "install dependencies."
+  become: true
   apt:
-    name: npm
-
-- name: Install node packages
-  become: yes
-  apt:
-    name: nodejs
+    name: ["nodejs", "npm"]
+    state: latest
+    update_cache: yes
 
 - name: "install pm2"
-  become: yes
+  become: true
   npm:
     name: pm2
     global: yes
