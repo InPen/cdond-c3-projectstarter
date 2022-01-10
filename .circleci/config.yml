@@ -1,6 +1,7 @@
 version: 2.1
 
 commands:
+
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     steps:
@@ -14,6 +15,7 @@ commands:
             --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
             echo "[web]" > .circleci/ansible/inventory.txt
             aws s3 rm s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
     steps:
@@ -403,8 +405,101 @@ jobs:
             fi
 
       # - destroy-environment
-      # - revert-migrations     
+      # - revert-migrations
 
+  cloudfront-update:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: install tar and gzip
+          command: |
+            yum install -y tar
+            yum install -y gzip
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Install dependencies
+          command: |
+            curl --silent --location https://rpm.nodesource.com/setup_14.x | bash -
+            yum -y install nodejs
+
+      - run:
+          name: Save old workflow ID
+          command: |
+            export OldWorkflowID=$(aws cloudformation \
+            list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
+            --no-paginate --output text)
+            echo OldWorkflowID: "${OldWorkflowID}"
+            export OLD_WF_NO=${OldWorkflowID: -7}
+            echo "${OLD_WF_NO}" >> ~/OLD_WF_NO.txt
+            echo "${OLD_WF_NO}"
+      - run:
+          name: Update cloudfront distribution
+          command: |
+            aws cloudformation deploy \
+            --template-file .circleci/files/cloudfront.yml \
+            --stack-name InitialStack \
+            --parameter-overrides WorkflowID="udapeople-${CIRCLE_WORKFLOW_ID:0:7}" \
+            --tags project=udapeople
+
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - OLD_WF_NO.txt
+      # - destroy-environment
+      # - revert-migrations    
+
+  cleanup:
+    docker:
+      - image: python:3.7-alpine3.11
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Install aws-cli
+          command: |
+            apk add --update py3-pip && pip3 install --upgrade pip && pip3 install awscli
+      - run:
+          name: Install curl
+          command: |
+            apk update
+            apk upgrade
+            apk --no-cache add curl
+            curl --version
+      - run:
+          name: Install gzip
+          command: |
+            apk update
+            apk add --no-cache --upgrade gzip
+      - run:
+          name: Install tar
+          command: |
+            apk add --no-cache tar
+      - run:
+          name: delete old stacks
+          command: |
+            echo CIRCLE_WORKFLOW_ID "${CIRCLE_WORKFLOW_ID:0:7}"
+            # Fetch the stack names    
+
+            export OLD_WF_NO=$( cat OLD_WF_NO.txt)
+            echo "${OLD_WF_NO}"
+            export STACKS=$( aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
+            --stack-status-filter CREATE_COMPLETE --no-paginate --output text)
+
+            echo Stack names: "$STACKS[@]"
+
+            for i in $STACKS[*]
+              do
+                if [[ $OLD_WF_NO != ${CIRCLE_WORKFLOW_ID:0:7} ]]
+                then
+                  aws s3 rm "s3://udapeople-${OLD_WF_NO}" --recursive
+                  aws cloudformation delete-stack --stack-name "udapeople-backend-${OLD_WF_NO}"
+                  aws cloudformation delete-stack --stack-name "udapeople-frontend-${OLD_WF_NO}"
+                fi
+              done
 
 
 workflows:
@@ -434,3 +529,7 @@ workflows:
           requires: [run-migrations]
       - smoke-test:
           requires: [deploy-frontend, deploy-backend]
+      - cloudfront-update:
+          requires: [smoke-test]
+      - cleanup:
+          requires: [cloudfront-update]
