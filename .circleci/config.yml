@@ -207,7 +207,7 @@ jobs:
     steps:
       - checkout
       - add_ssh_keys:
-          fingerprints: ["7c:b2:29:a4:13:26:99:f1:7f:f6:2e:60:31:1f:70:86:7b:4a:c8:7d"]
+          fingerprints: ["26:c7:90:c9:2c:90:73:a8:b4:25:8c:23:37:3d:2d:8f:a0:a0:d0:c6"]
       - attach_workspace:
           at: ~/ 
       - run:
@@ -306,7 +306,7 @@ jobs:
     steps:
       - checkout
       - add_ssh_keys:
-          fingerprints: ["7c:b2:29:a4:13:26:99:f1:7f:f6:2e:60:31:1f:70:86:7b:4a:c8:7d"]
+          fingerprints: ["26:c7:90:c9:2c:90:73:a8:b4:25:8c:23:37:3d:2d:8f:a0:a0:d0:c6"]
       - run:
           name: Install gzip
           command: |
