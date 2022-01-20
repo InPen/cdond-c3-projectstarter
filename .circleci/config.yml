@@ -232,25 +232,25 @@ jobs:
           command: |
             ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
 
-  # run-migrations:
-  #   docker:
-  #     - image: circleci/node:13.8.0
-  #   steps:
-  #     - checkout
-  #     - restore_cache:
-  #         keys: [backend-build]
-  #     - run: 
-  #         name: Run migrations
-  #         command: |
-  #           cd backend
-  #           npm install
-  #           npm run migrations > migrations_dump.txt
-  #           cat migrations_dump.txt
-  #     - save_cache:
-  #         name: Migration Resources
-  #         key: migration-dump
-  #         paths:
-  #           - ~/project/backend/migrations_dump.txt        
+  run-migrations:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - restore_cache:
+          keys: [backend-build]
+      - run: 
+          name: Run migrations
+          command: |
+            cd backend
+            npm install
+            npm run migrations > migrations_dump.txt
+            cat migrations_dump.txt
+      - save_cache:
+          name: Migration Resources
+          key: migration-dump
+          paths:
+            - ~/project/backend/migrations_dump.txt        
 # references this path
 #           command: |
 #             if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
